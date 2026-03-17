@@ -1,3 +1,21 @@
+https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+<script>
+  const SUPABASE_URL = "https://uchvmhycshcpyhutwvgu.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHZtaHljc2hjcHlodXR3dmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTc3MTYsImV4cCI6MjA4OTI5MzcxNn0.kZyAKBQDf6kUuZcU16a9YbC2JFjtrvAY5VTM7Gu2UUU";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  supabase.from("highscores").select("*").limit(1)
+    .then(({ data, error }) => {
+      if (error) {
+        console.error("Supabase ERROR:", error);
+      } else {
+        console.log("Supabase OK – database kontakt virker:", data);
+      }
+    });
+</script>
+
+
 <!-- 1. Hent Supabase JS bibliotek -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- 2. Opret Supabase klient -->
