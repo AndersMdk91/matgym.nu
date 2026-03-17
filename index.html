@@ -3,10 +3,10 @@
   const SUPABASE_URL = "https://uchvmhycshcpyhutwvgu.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHZtaHljc2hjcHlodXR3dmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTc3MTYsImV4cCI6MjA4OTI5MzcxNn0.kZyAKBQDf6kUuZcU16a9YbC2JFjtrvAY5VTM7Gu2UUU";
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase1 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // Test at supabase virker:
-  supabase.from("highscores").select("*").limit(1).then(({ data, error }) => {
+  supabase1.from("highscores").select("*").limit(1).then(({ data, error }) => {
     if (error) console.error("Supabase ERROR:", error);
     else console.log("Supabase OK:", data);
   });
