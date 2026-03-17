@@ -1,4 +1,7 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://uchvmhycshcpyhutwvgu.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHZtaHljc2hjcHlodXR3dmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTc3MTYsImV4cCI6MjA4OTI5MzcxNn0.kZyAKBQDf6kUuZcU16a9YbC2JFjtrvAY5VTM7Gu2UUU";
@@ -11,10 +14,6 @@
     else console.log("Supabase OK:", data);
   });
 </script>
-
-<!DOCTYPE html>
-<html lang="da">
-<head>
 <meta charset="UTF-8">
 <title>Trigonometrispil – Enhedscirkel</title>
 <style>
@@ -280,31 +279,32 @@ startGame();
 </script>
 
 </body>
-</html>
+
 async function saveHighscore(name, points) {
-  const { error } = await supabase
-    .from('highscores')
+  const { error } = await supabase1
+    .from('public.Highscores')
     .insert([
       { name: name, points: points }
     ]);
 
   if (error) {
-    console.error("Fejl ved gemning til Supabase:", error);
+    console.error("Fejl ved gemning til Supabase1:", error);
   } else {
-    console.log("Highscore gemt i Supabase!");
+    console.log("Highscore gemt i Supabase1!");
   }
 }
 async function loadHighscores() {
-  const { data, error } = await supabase
+  const { data, error } = await supabase1
     .from('highscores')
     .select('*')
     .order('points', { ascending: false })
     .limit(5);
 
   if (error) {
-    console.error("Fejl ved hentning fra Supabase:", error);
+    console.error("Fejl ved hentning fra Supabase1:", error);
     return [];
   }
 
   return data;
 }
+  </html>
