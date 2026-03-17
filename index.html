@@ -3,25 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Trigonometrispil – Enhedscirkel</title>
-
-<!-- Indlæs Supabase JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Initialisér Supabase klienten -->
-<script>
-  const SUPABASE_URL = "https://uchvmhycshcpyhutwvgu.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjaHZtaHljc2hjcHlodXR3dmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTc3MTYsImV4cCI6MjA4OTI5MzcxNn0.kZyAKBQDf6kUuZcU16a9YbC2JFjtrvAY5VTM7Gu2UUU";
-
-  /* 🔥 HER er din nye klient-variabel: sb */
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Test om Supabase virker
-  sb.from("public.Highscores").select("*").limit(1).then(({ data, error }) => {
-    if (error) console.error("Supabase ERROR:", error);
-    else console.log("Supabase OK:", data);
-  });
-</script>
-
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -63,7 +44,6 @@
         border: 1px solid #ddd;
     }
 </style>
-
 </head>
 <body>
 
@@ -83,3 +63,200 @@
 
         <p id="result"></p>
 
+        <button onclick="startGame()" style="width: 100%; margin-top: 10px;">Nyt spil</button>
+    </div>
+</div>
+
+<div id="highscore">
+    <h3>Highscore (Top 5)</h3>
+    <ol id="scoreList"></ol>
+</div>
+
+<script>
+const canvas = document.getElementById("circleCanvas");
+const ctx = canvas.getContext("2d");
+const centerX = 190;
+const centerY = 190;
+const radius = 150;
+
+let angle, x, y, task;
+let round = 1;
+let points = 0;
+let highscores = JSON.parse(localStorage.getItem("trigHighscore") || "[]");
+
+// ----------- Tegning -------------------
+
+function drawGrid() {
+    ctx.strokeStyle = "#e0e0e0";
+    ctx.lineWidth = 1;
+
+    for (let i = -1; i <= 1; i += 0.1) {
+        let px = centerX + i * radius;
+        let py = centerY + i * radius;
+
+        ctx.beginPath();
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px, 380);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, py);
+        ctx.lineTo(380, py);
+        ctx.stroke();
+    }
+}
+
+function drawCircle() {
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#777";
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(380, centerY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, 380);
+    ctx.stroke();
+}
+
+function drawAngleArc() {
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 40, 0, -angle, true);
+    ctx.stroke();
+
+    ctx.fillStyle = "blue";
+    ctx.font = "16px Arial";
+    ctx.fillText((angle * 180/Math.PI).toFixed(1) + "°", centerX + 50, centerY - 10);
+}
+
+function drawPointAndLine() {
+    let px = centerX + x * radius;
+    let py = centerY - y * radius;
+
+    ctx.strokeStyle = "green";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, 2 * Math.PI);
+    ctx.fill();
+}
+
+// ----------- Spilfunktioner -------------------
+
+function newProblem() {
+    ctx.clearRect(0, 0, 380, 380);
+
+    drawGrid();
+    drawCircle();
+
+    angle = Math.random() * Math.PI;  // 0° til 180°
+    x = Math.cos(angle);
+    y = Math.sin(angle);
+
+    drawAngleArc();
+    drawPointAndLine();
+
+    task = Math.random() < 0.5 ? "cos" : "sin";
+
+    document.getElementById("taskText").innerHTML =
+        `Bestem <span style="color:red; font-size:1.3em;">${task}(v)</span> for punktet`;
+
+    document.getElementById("result").innerText = "";
+    document.getElementById("answerInput").value = "";
+}
+
+function checkAnswer() {
+    let student = parseFloat(document.getElementById("answerInput").value);
+    if (isNaN(student)) return;
+
+    let correct = task === "cos" ? x : y;
+    let diff = Math.abs(student - correct);
+
+    // --------- POINTSYSTEM 1–10 ---------
+    let reward = Math.max(1, Math.round((0.1 - diff) * 100));
+
+    if (diff <= 0.1) {
+        points += reward;
+
+        document.getElementById("result").style.color = "green";
+        const praise = ["Flot!", "Super!", "Godt klaret!", "Skarpt!", "Fremragende!"];
+        let chosen = praise[Math.floor(Math.random() * praise.length)];
+
+        document.getElementById("result").innerText =
+            `${chosen} Rigtigt! (${correct.toFixed(3)}) +${reward} point`;
+    } else {
+        document.getElementById("result").style.color = "red";
+        document.getElementById("result").innerText =
+            `Forkert. Rigtigt svar er ${correct.toFixed(3)}.`;
+    }
+
+    round++;
+    document.getElementById("pointsText").innerText = "Point: " + points;
+    document.getElementById("roundText").innerText = "Runde: " + round + " / 5";
+
+    if (round <= 5) {
+        setTimeout(newProblem, 1200);
+    } else {
+        setTimeout(() => endGame(), 1500);
+    }
+}
+
+function startGame() {
+    round = 1;
+    points = 0;
+    document.getElementById("pointsText").innerText = "Point: 0";
+    document.getElementById("roundText").innerText = "Runde: 1 / 5";
+    newProblem();
+}
+
+function endGame() {
+    // Henter navn én gang pr. session
+    let name = localStorage.getItem("playerName");
+
+    if (!name) {
+        name = prompt("Indtast dit navn til highscore:");
+        if (name) localStorage.setItem("playerName", name);
+    }
+
+    // Gem score
+    highscores.push({name, points});
+    highscores.sort((a,b) => b.points - a.points);
+    highscores = highscores.slice(0,5);
+    localStorage.setItem("trigHighscore", JSON.stringify(highscores));
+
+    updateHighscore();
+
+    // 🔁 AUTOMATISK NYT SPIL
+    startGame();
+}
+
+function updateHighscore() {
+    const list = document.getElementById("scoreList");
+    list.innerHTML = "";
+    highscores.forEach(s => {
+        let li = document.createElement("li");
+        li.innerText = `${s.name}: ${s.points} point`;
+        list.appendChild(li);
+    });
+}
+
+updateHighscore();
+startGame();
+</script>
+
+</body>
+</html>
